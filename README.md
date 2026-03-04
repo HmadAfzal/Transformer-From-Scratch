@@ -1,80 +1,163 @@
-# Transformer from Scratch: An Implementation of "Attention Is All You Need"
-![Transformer Architecture](assets/transformer.webp)
+# Attention From Zero – PyTorch Implementation of “Attention Is All You Need”
 
-Building a Transformer isn't just about importing a library, it's about understanding the delicate dance of tensors, masks, and attention scores. This repository is a ground-up PyTorch implementation of the original Transformer architecture as described in the seminal 2017 paper: **[Attention Is All You Need](https://arxiv.org/abs/1706.03762)**.
+![Transformer Architecture](assets/transformer.png)
 
-Instead of using high-level libraries, I implemented every mathematical block in PyTorch to understand the mechanics of Self-Attention, Cross-Attention, and the Encoder-Decoder interplay.
+This project implements the **Transformer architecture from scratch in PyTorch** for bilingual neural machine translation.
 
-## Why I Built This?
+This implementation follows the original paper:
+**Attention Is All You Need** – Vaswani et al., 2017
+[https://arxiv.org/abs/1706.03762](https://arxiv.org/abs/1706.03762)
 
-Most modern NLP rests on the shoulders of the Transformer, yet many developers treat it as a black box. I built this repository to deconstruct that box. By implementing every layer manually from the sinusoidal positional encodings to the complex causal masking. I wanted to master the mechanics of how machines understand sequence and context.
+Instead of relying on high-level libraries like Hugging Face Transformers, every architectural component is implemented manually to demonstrate a deep understanding of attention mechanisms, masking, and sequence modeling.
 
 ---
 
-## 🛠️ Architecture & Implementation Details
+## Project Objective
 
-### 1. The Core: Multi-Head Attention (`model.py`)
+Modern NLP systems are built on Transformers, yet many engineers interact with them only through APIs.
 
-Instead of a single attention pass, I implemented the Multi-Head mechanism which allows the model to "look" at the sentence from different perspectives simultaneously.
+This project was built to:
+
+* Implement the full encoder–decoder Transformer architecture from first principles
+* Understand the mathematics behind scaled dot-product attention
+* Engineer a complete training and evaluation pipeline
+* Implement masking logic correctly across multi-head attention
+* Train and evaluate a bilingual neural machine translation model end-to-end
+
+This is not a wrapper around an existing model — the attention blocks, encoder, decoder, and decoding logic are implemented manually.
+
+---
+
+## Architecture Overview
+
+The implementation follows the original paper design.
+
+### Core Components
+
+* Token Embeddings
+* Sinusoidal Positional Encoding
+* Multi-Head Self-Attention
+* Encoder–Decoder Cross-Attention
+* Feed Forward Networks
+* Residual Connections + Layer Normalization
+* Output Projection Layer
+* Greedy Decoding for inference
+
+---
+
+### Scaled Dot-Product Attention
+
+![Transformer Architecture](assets/scaled-dot.png)
 
 $$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
 
-### 2. Positional Encoding
-
-Since Transformers process tokens in parallel, they lack an inherent sense of "order." I implemented sinusoidal encodings using sine and cosine functions of different frequencies to inject relative position into the embeddings.
-
-### 3. The Data Pipeline (`dataset.py` & `config.py`)
-
-* **Source:** Trained on the **Opus Books** dataset (English to Italian).
-* **Tokenizer:** Built a custom `WordLevel` tokenizer to handle the specific vocabulary of the dataset.
-* **Masking:** Implemented **Causal Masking** in the decoder to prevent "cheating" during the training phase.
+Multi-head attention enables the model to attend to different representation subspaces simultaneously.
 
 ---
 
-## Interpretability & Results
+### Encoder Block
 
-A key feature of this repo is the **Attention Visualization** (`attention_visual.ipynb`). Using **Altair**, I created interactive heatmaps that allow you to see exactly which words the model is "looking at" when it generates a translation.
-![Attention Heatmap](assets/attention_map.png)
+Each encoder layer consists of:
 
-### Performance Metrics
-
-I integrated `torchmetrics` to track the model's progress beyond simple loss:
-
-* **BLEU Score:** For linguistic quality.
-* **Word Error Rate (WER):** For translation accuracy.
+1. Multi-head self-attention
+2. Feed-forward network
+3. Residual connection
+4. Layer normalization
 
 ---
 
-## 🚀 Quick Start
+### Decoder Block
 
-1. **Setup:**
+Each decoder layer consists of:
+
+1. Masked self-attention (causal mask)
+2. Cross-attention over encoder output
+3. Feed-forward network
+4. Residual connections
+5. Layer normalization
+
+Causal masking ensures the decoder cannot attend to future tokens during training.
+
+---
+
+## Dataset & Training Pipeline
+
+* Dataset: **OPUS Books (English → Italian)**
+* Custom WordLevel tokenizer trained on dataset vocabulary
+* Special tokens: `[UNK]`, `[PAD]`, `[SOS]`, `[EOS]`
+* Teacher forcing during training
+* Cross-entropy loss with label smoothing
+* Xavier initialization
+* Adam optimizer
+* Model checkpoint saved after every epoch
+
+Evaluation metrics are tracked using `torchmetrics`:
+
+* BLEU Score
+* Word Error Rate (WER)
+* Character Error Rate (CER)
+
+---
+
+## Interpretability
+
+An additional notebook (`attention_visual.ipynb`) visualizes attention weights using interactive heatmaps.
+
+This allows inspection of which source tokens the model attends to while generating each target token.
+
+This improves interpretability and demonstrates internal attention dynamics rather than treating the model as a black box.
+
+![Transformer Architecture](assets/attention_map.png)
+---
+
+## Project Structure
+
+```
+.
+├── model.py                  # Transformer architecture implementation
+├── dataset.py                # Dataset handling, masking, token preparation
+├── train.py                  # Training loop, validation, checkpointing
+├── config.py                 # Hyperparameter configuration
+├── translate.py              # Inference script with greedy decoding
+├── attention_visual.ipynb    # Attention heatmap visualization
+└── assets/                   # Images used in documentation
+```
+
+---
+
+## How to Run
+
+### Clone Repository
+
 ```bash
 git clone https://github.com/HmadAfzal/Transformer-From-Scratch
-pip install -r requirements.txt
-
+cd Transformer-From-Scratch
 ```
 
+### Install Dependencies
 
-2. **Train the Model:**
+```bash
+pip install -r requirements.txt
+```
+
+### Train the Model
+
 ```bash
 python train.py
-
 ```
 
+### Run Inference
 
-3. **Run Inference:**
 ```bash
 python translate.py "Building a transformer from scratch is challenging but rewarding."
-
 ```
 
-
 ---
 
-## Key Challenges
+## References
 
-The most difficult part of this project wasn't the math it was the **Broadcasting and Reshaping**. Specifically, ensuring the attention masks correctly blocked future tokens across multiple heads while maintaining the `(Batch, Head, Seq_Len, d_k)` shape was a significant logic puzzle that required rigorous debugging.
+Vaswani, A. et al. (2017).
+**Attention Is All You Need**
+[https://arxiv.org/abs/1706.03762](https://arxiv.org/abs/1706.03762)
 
 ---
-
-> **Note:** The core technical content and architecture of this README are mine, while the English and formatting were refined for clarity by Gemini.
