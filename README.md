@@ -161,3 +161,8 @@ Vaswani, A. et al. (2017).
 [https://arxiv.org/abs/1706.03762](https://arxiv.org/abs/1706.03762)
 
 ---
+
+## External Resources
+
+- LinkedIn Post:
+[Built the Transformer from Scratch in PyTorch](https://www.linkedin.com/posts/hmad-afzal_built-the-transformer-from-scratch-in-pytorch-activity-7434940337585872897-5P7n?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEdOn90Bny24D7Zh9y99ozKwcNNRSVapdws)
